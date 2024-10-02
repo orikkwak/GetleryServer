@@ -1,4 +1,4 @@
-// app.js
+// D:\getlery-server\app.js
 
 // 환경 변수 설정
 require('dotenv').config();
@@ -8,9 +8,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const photoRoutes = require('./routes/photoRoutes');
+const nimaRoutes = require('./routes/nimaRoutes');
 
 // 미들웨어 설정 (JSON 데이터 처리)
 app.use(express.json());
+
+// 사진 및 NIMA 관련 라우트 사용
+app.use('/photos', photoRoutes);
+app.use('/nima', nimaRoutes);
 
 // Mongoose 연결 (MongoDB)
 mongoose.connect(process.env.MONGO_URI, {

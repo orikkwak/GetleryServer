@@ -1,4 +1,4 @@
-// routes/photoRoutes.js
+// D:\getlery-server\routes\photoRoutes.js
 
 const express = require('express');
 const Photo = require('../models/photo');  // 사진 모델 가져오기
