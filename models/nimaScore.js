@@ -1,20 +1,12 @@
 // models/nimaScore.js
+
 const mongoose = require('mongoose');
 
-const NimaScoreSchema = new mongoose.Schema({
-  photoId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Photo',
-    required: true
-  },
-  nimaScore: {
-    type: Number,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+const nimaScoreSchema = new mongoose.Schema({
+  photoId: { type: String, required: true },  // 연관된 사진 ID
+  nimaScore: { type: Number, required: true },  // NIMA 점수
+  calculatedAt: { type: Date, default: Date.now },  // NIMA 점수가 계산된 시간
 });
 
-module.exports = mongoose.model('NimaScore', NimaScoreSchema);
+const NimaScore = mongoose.model('NimaScore', nimaScoreSchema);
+module.exports = NimaScore;
