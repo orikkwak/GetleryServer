@@ -10,8 +10,9 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 from dotenv import load_dotenv
-from model.model import NIMA
+from nima.model.model import NIMA
 import numpy as np
+import gdown
 
 # 환경 변수 로드
 load_dotenv()
@@ -23,25 +24,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 app = Flask(__name__)
 CORS(app)
 
-# Google Drive에서 NIMA 모델 다운로드하는 함수
-def download_nima_model():
-    url = "https://drive.google.com/uc?export=download&id=1w0USNF6VldajHRd8ioYqicQRXCNjWMXF"
-    model_path = "ckpts/epoch-4.pth"
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-
-    # 파일이 없을 때만 다운로드
-    if not os.path.exists(model_path):
-        logging.info("NIMA 모델 다운로드 중...")
-        response = requests.get(url, stream=True)
-        with open(model_path, 'wb') as f:
-            f.write(response.content)
-        logging.info("NIMA 모델 다운로드 완료.")
-    else:
-        logging.info("이미 NIMA 모델이 존재합니다.")
-
-# NIMA 모델 초기화
-download_nima_model()  # 모델 다운로드 호출
-model_path = "ckpts/epoch-4.pth"  # 다운로드된 모델 경로
+model_path = r"D:\getlery-server\ckpts\epoch-4.pth"
 base_model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
 nima_model = NIMA(base_model)
 nima_model.load_state_dict(torch.load(model_path))
