@@ -1,3 +1,4 @@
+//D:\getlery-server\utils\nimaUtils.js
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');

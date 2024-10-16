@@ -1,10 +1,7 @@
-# getlery-server/app.py
-
 import os
 import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import requests
 import torch
 import torchvision.transforms as transforms
 import torchvision.models as models
@@ -12,7 +9,7 @@ from PIL import Image
 from dotenv import load_dotenv
 from nima.model.model import NIMA
 import numpy as np
-import gdown
+import requests
 
 # 환경 변수 로드
 load_dotenv()
@@ -24,11 +21,23 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 app = Flask(__name__)
 CORS(app)
 
-model_path = r"D:\getlery-server\ckpts\epoch-4.pth"
-base_model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
-nima_model = NIMA(base_model)
-nima_model.load_state_dict(torch.load(model_path))
-nima_model.eval()
+# 모델 로드 및 설정
+def load_nima_model():
+    try:
+        model_path = r"D:\getlery-server\nima\ckpts\epoch-4.pth"  # 가중치 파일 경로 확인
+        base_model = models.vgg16(weights=models.VGG16_Weights.DEFAULT)
+        nima_model = NIMA(base_model)
+
+        # 가중치만 로드하도록 수정
+        nima_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=True))
+        nima_model.eval()  # 평가 모드로 설정
+        logging.info("NIMA 모델 로드 완료")
+        return nima_model
+    except Exception as e:
+        logging.error(f"모델 로드 실패: {e}")
+        return None
+
+nima_model = load_nima_model()
 
 # 이미지 전처리 변환 설정
 transform = transforms.Compose([
@@ -96,10 +105,13 @@ def get_nima_score():
     images = request.files.getlist('images')
     nima_scores = {}
 
+    if nima_model is None:
+        return jsonify({'error': 'NIMA 모델이 로드되지 않았습니다.'}), 500
+
     for image in images:
-        # 이미지 처리
         try:
             pil_image = Image.open(image).convert('RGB')
+            logging.info("Image successfully opened and converted.")
         except Exception as e:
             logging.error(f"Error opening image: {e}")
             continue
@@ -112,6 +124,9 @@ def get_nima_score():
 
         # 결과 저장 (파일명 및 NIMA 점수)
         nima_scores[image.filename] = nima_score
+
+        # NIMA 점수를 Node.js 서버로 전송
+        send_nima_score_to_nodejs(image.filename, nima_score)
 
     return jsonify({'nima_scores': nima_scores})
 

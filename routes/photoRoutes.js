@@ -1,8 +1,9 @@
+//D:\getlery-server\routes\photoRoutes.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const Photo = require('../models/photo');
-const { calculateNimaScore } = require('../utils/nima');
+const { calculateNimaScore } = require('../utils/nimaUtils');
 const upload = multer({ dest: 'uploads/' });
 
 // 사진 업로드 API
