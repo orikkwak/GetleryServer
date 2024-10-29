@@ -1,44 +1,47 @@
 import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from work.controllers.model_loader import load_nima_model
-from work.controllers.image_processor import process_image
-from work.controllers.cache import cache
+from work.controllers.nima_utils import load_nima_model, calculate_nima_score
 from work.config.config import config
+from work.controllers.group_utils import select_representative_images
 
 app = Flask(__name__)
 CORS(app)
-
-asyncio.run(load_nima_model())
 executor = ThreadPoolExecutor(max_workers=5)
+logging.basicConfig(level=logging.INFO)
 
-# /get_nima_score 엔드포인트 정의
+# NIMA 모델 로드
+logging.info("Loading NIMA model...")
+nima_model = load_nima_model(config.MODEL_PATH)
+logging.info("NIMA model loaded successfully.")
+
+# 개별 이미지 NIMA 점수 계산 API
 @app.route('/get_nima_score', methods=['POST'])
-async def get_nima_score():
-    if 'images' not in request.files:
-        return jsonify({'error': 'No images provided'}), 400
+def get_nima_score():
+    if 'image' not in request.files:
+        logging.error("No image provided in the request.")
+        return jsonify({'error': 'No image provided'}), 400
 
-    # 이미지 파일 리스트 생성
-    images = []
-    for file_key in request.files:
-        if file_key == 'images':
-            images.append(request.files[file_key])
+    image = request.files['image']
+    logging.info(f"Calculating NIMA score for image: {image.filename}")
+    score = executor.submit(calculate_nima_score, image, nima_model).result()
+    logging.info(f"Calculated NIMA score: {score} for image: {image.filename}")
+    return jsonify({'nima_score': score})
 
-    nima_scores = {}
+# 그룹 대표 이미지 선택 API
+@app.route('/select_representative_images', methods=['POST'])
+def representative_images():
+    data = request.json
+    similar_groups = data.get('similar_groups')
+    num_representatives = data.get('num_representatives', 3)
 
-    # 비동기 멀티스레딩으로 이미지 처리
-    tasks = [executor.submit(process_image, image) for image in images if image.filename not in cache]
-    results = await asyncio.gather(*[asyncio.wrap_future(task) for task in tasks])
+    logging.info("Selecting representative images for provided groups.")
+    representative_images = select_representative_images(similar_groups, nima_model, num_representatives)
+    logging.info(f"Selected representative images: {representative_images}")
+    return jsonify({'representative_images': representative_images})
 
-    for image, nima_score in zip(images, results):
-        nima_scores[image.filename] = nima_score
-
-    return jsonify({'nima_scores': nima_scores})
-
-
-
-# 서버 실행 코드
 if __name__ == '__main__':
+    logging.info("Starting Flask app...")
     app.run(host='0.0.0.0', port=config.PORT, debug=True)
+    logging.info("Flask서버 연결되었습니다.")

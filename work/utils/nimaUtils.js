@@ -1,34 +1,19 @@
-const axios = require('axios');
-const fs = require('fs');
-const FormData = require('form-data');
+const path = require('path');
+const { calculateNimaScore } = require('./nimaUtils');  // NIMA 점수 계산 함수
 
-const cache = new Map();
+async function getRepresentativeImage(images) {
+  let highestScore = -1;
+  let representativeImage = null;
 
-async function calculateNimaScore(imagePath) {
-  if (cache.has(imagePath)) {
-    return cache.get(imagePath); // 캐시된 점수 반환
-  }
-
-  try {
-    const form = new FormData();
-    form.append('image', fs.createReadStream(imagePath));
-
-    const response = await axios.post('http://localhost:5000/get_nima_score', form, {
-      headers: form.getHeaders(),
-      timeout: 10000  // 타임아웃 설정
-    });
-
-    if (response.status === 200) {
-      const nimaScore = response.data.nima_scores[imagePath];
-      cache.set(imagePath, nimaScore); // 점수 캐싱
-      return nimaScore;
-    } else {
-      console.error('Failed to calculate NIMA score:', response.statusText);
+  for (const image of images) {
+    const score = await calculateNimaScore(path.join('uploads', image));
+    if (score > highestScore) {
+      highestScore = score;
+      representativeImage = image;
     }
-  } catch (error) {
-    console.error('Error calculating NIMA score:', error);
   }
-  return null;
+
+  return { image: representativeImage, score: highestScore };
 }
 
-module.exports = { calculateNimaScore };
+module.exports = { getRepresentativeImage };

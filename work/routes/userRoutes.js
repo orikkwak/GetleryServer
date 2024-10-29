@@ -1,13 +1,6 @@
-//D:\getlery-server\routes\userRoutes.js
 const express = require('express');
 const User = require('../models/user');
 const router = express.Router();
-
-// 랜덤 닉네임 생성 함수
-function generateRandomUsername() {
-  const randomNum = Math.floor(1000 + Math.random() * 9000);  // 1000에서 9999 사이의 랜덤 숫자
-  return `user-${randomNum}`;
-}
 
 // 사용자 자동 로그인 및 생성 API
 router.post('/login', async (req, res) => {
@@ -16,8 +9,7 @@ router.post('/login', async (req, res) => {
 
     let user = await User.findOne({ deviceId });
     if (!user) {
-      const username = generateRandomUsername();
-      user = new User({ deviceId, username });
+      user = new User({ deviceId, username: `user-${Math.floor(1000 + Math.random() * 9000)}` });
       await user.save();
     }
 
