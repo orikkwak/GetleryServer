@@ -38,3 +38,5 @@ nima/ckpts/epoch-4.pth
 
 # MacOS 관련 불필요한 파일들
 .DS_Store
+
+/new_env/

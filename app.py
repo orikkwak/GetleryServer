@@ -1,11 +1,12 @@
 import logging
-import asyncio
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from work.controllers.model_loader import load_nima_model
 from work.controllers.image_processor import process_image
 from work.controllers.cache import cache
+from work.config.config import config
 
 app = Flask(__name__)
 CORS(app)
