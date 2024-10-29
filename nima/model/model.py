@@ -5,15 +5,15 @@ Implements the aesthemic model and emd loss used in paper.
 Copyright (C) Yunxiao Shi 2017 - 2021
 NIMA is released under the MIT license. See LICENSE for the fill license text.
 """
-# D:\getlery-server\nima\model\model.py
+
 import torch
 import torch.nn as nn
 
-class NIMA(nn.Module):
+class NIMA(nn.Module): # NIMA클래스 정의. 신경망 모듈 활용
 
     """Neural IMage Assessment model by Google"""
-    def __init__(self, base_model, num_classes=10):
-        super(NIMA, self).__init__()
+    def __init__(self, base_model, num_classes=10): # 클래스의 생성자메서드. NIMA 클래스의 인스턴스를 초기화. base_model = 기본 모델(예: VGG16), num_classes = 분류할 클래스 수. 기본값 = 10.
+        super(NIMA, self).__init__() #
         self.features = base_model.features
         self.classifier = nn.Sequential(
             nn.Dropout(p=0.75),
@@ -40,7 +40,7 @@ def single_emd_loss(p, q, r=2):
     length = p.shape[0]
     emd_loss = 0.0
     for i in range(1, length + 1):
-        emd_loss += torch.abs(sum(p[:i] - q[:i])) ** r
+        emd_loss += torch.abs(torch.sum(p[:i] - q[:i])) ** r  # 수정된 부분
     return (emd_loss / length) ** (1. / r)
 
 

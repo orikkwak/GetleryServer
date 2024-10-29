@@ -1,4 +1,4 @@
-import os
+""" import os
 import cv2
 import numpy as np
 from skimage import io
@@ -82,3 +82,4 @@ brisque_score3 = compute_brisque(image3_path)
 noise_level3 = compute_noise_level(image3_path)
 
 print(f"Image 3 - Sharpness (Laplacian): {sharpness3}, Tenengrad: {tenengrad3}, BRISQUE Score: {brisque_score3}, Noise Level: {noise_level3}")
+ """

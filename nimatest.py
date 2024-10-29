@@ -1,4 +1,4 @@
-from skimage import io
+""" from skimage import io
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import resize
 import numpy as np
@@ -15,4 +15,4 @@ else:
 
 # SSIM 계산 (데이터 범위 설정)
 quality_score = ssim(image1, image2_resized, win_size=3, multichannel=True, data_range=image1.max() - image1.min())
-print(f"Image quality score: {quality_score}")
+print(f"Image quality score: {quality_score}") """
