@@ -20,8 +20,12 @@ async def get_nima_score():
     if 'images' not in request.files:
         return jsonify({'error': 'No images provided'}), 400
 
-    # getlist 메서드로 이미지 목록 가져오기
-    images = request.files.getlist('images')
+    # 이미지 파일 리스트 생성
+    images = []
+    for file_key in request.files:
+        if file_key == 'images':
+            images.append(request.files[file_key])
+
     nima_scores = {}
 
     # 비동기 멀티스레딩으로 이미지 처리
@@ -32,6 +36,8 @@ async def get_nima_score():
         nima_scores[image.filename] = nima_score
 
     return jsonify({'nima_scores': nima_scores})
+
+
 
 # 서버 실행 코드
 if __name__ == '__main__':
