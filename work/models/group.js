@@ -9,10 +9,18 @@ const groupSchema = new Schema({
 });
 
 // 그룹 모델의 대표 이미지를 NIMA 점수로 선택하는 함수
-groupSchema.methods.selectRepresentativeByNima = function() {
+groupSchema.methods.selectRepresentativeByNima = async function() {
   // images 배열을 NIMA 점수로 정렬하여 첫 번째 이미지를 대표 이미지로 설정
+  await this.populate('images');  // 이미지 참조 로드
+
   this.images.sort((a, b) => (b.nimaScore || 0) - (a.nimaScore || 0));
-  this.representativeImage = this.images[0];
+  this.representativeImage = this.images.length > 0 ? this.images[0]._id : null;
+};
+
+// 이미지 추가 시 대표 이미지 자동 선택
+groupSchema.methods.addImage = async function(imageId) {
+  this.images.push(imageId);
+  await this.selectRepresentativeByNima();  // NIMA 점수에 따라 대표 이미지 갱신
 };
 
 const Group = mongoose.model('Group', groupSchema);

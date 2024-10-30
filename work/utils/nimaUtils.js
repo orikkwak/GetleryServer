@@ -1,19 +1,14 @@
-const path = require('path');
-const { calculateNimaScore } = require('./nimaUtils');  // NIMA 점수 계산 함수
+// work/utils/nimaUtils.js
+const axios = require('axios');
 
-async function getRepresentativeImage(images) {
-  let highestScore = -1;
-  let representativeImage = null;
-
-  for (const image of images) {
-    const score = await calculateNimaScore(path.join('uploads', image));
-    if (score > highestScore) {
-      highestScore = score;
-      representativeImage = image;
-    }
+async function calculateNimaScore(imagePath) {
+  try {
+    const response = await axios.post('http://localhost:5000/nima_score', { imagePath });
+    return response.data.score;
+  } catch (error) {
+    console.error("Error calculating NIMA score:", error);
+    return null;
   }
-
-  return { image: representativeImage, score: highestScore };
 }
 
-module.exports = { getRepresentativeImage };
+module.exports = { calculateNimaScore };

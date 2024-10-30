@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const Photo = require('../models/photo');
+const Photo = require('../models/image');
 const { calculateNimaScore } = require('../utils/nimaUtils');
 const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
@@ -50,6 +50,23 @@ router.delete('/:photoId', async (req, res) => {
     res.status(200).json({ message: 'Photo deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Error deleting photo', error: err });
+  }
+});
+
+// 특정 이미지의 삭제 일정을 설정하는 API (5시간 후 삭제 예정)
+router.post('/schedule-delete/:id', async (req, res) => {
+  try {
+    const image = await Photo.findById(req.params.id);
+    if (!image) return res.status(404).json({ message: 'Image not found' });
+
+    // 현재 시간 기준으로 5시간 뒤 삭제 일정 설정
+    const deleteTime = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    image.deleteScheduledAt = deleteTime;
+    await image.save();
+
+    res.status(200).json({ message: 'Delete schedule set for image', deleteScheduledAt: deleteTime });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

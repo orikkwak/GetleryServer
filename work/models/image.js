@@ -13,6 +13,7 @@ const photoSchema = new mongoose.Schema({
   isFavorite: { type: Boolean, default: false },  // 사용자가 즐겨찾기로 설정한 이미지인지 여부
   latitude: { type: Number },  // 이미지가 찍힌 위치의 위도
   longitude: { type: Number },  // 이미지가 찍힌 위치의 경도
+  deleteScheduledAt: { type: Date } // 삭제 예정 시간 필드 추가
 });
 
 const Photo = mongoose.model('Photo', photoSchema);

@@ -1,16 +1,13 @@
-# group_utils.py
+# work/controllers/group_utils.py
 
 import numpy as np
 from PIL import Image
 from work.controllers.nima_utils import calculate_nima_score
 
-# NIMA 점수 계산 함수 임포트
-
-# 대표 이미지 선택 함수
-def select_representative_images(similar_groups, model, num_representatives=3):
+def select_representative_images(groups, model, num_representatives=1):
     representative_images = []
 
-    for i, group in enumerate(similar_groups):
+    for group in groups:
         group_representative_images = []
         scores = []
 
@@ -19,7 +16,8 @@ def select_representative_images(similar_groups, model, num_representatives=3):
             group_representative_images.append((image_path, score))
             scores.append(score)
 
-        if len(set(scores)) == 1 or max(scores) - min(scores) < 0.00000001:
+        # 점수가 동일한 경우 대체 기준 적용
+        if len(set(scores)) == 1 or max(scores) - min(scores) < 1e-7:
             coefficients = [np.std(np.array(Image.open(img).convert('L'))) / np.mean(np.array(Image.open(img).convert('L'))) for img, _ in group_representative_images]
             group_representative_images = [x for _, x in sorted(zip(coefficients, group_representative_images))]
         else:

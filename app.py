@@ -6,6 +6,7 @@ from work.controllers.nima_utils import load_nima_model, calculate_nima_score
 from work.config.config import config
 from work.controllers.group_utils import select_representative_images
 
+# Flask 앱과 스레드풀 설정
 app = Flask(__name__)
 CORS(app)
 executor = ThreadPoolExecutor(max_workers=5)
@@ -25,8 +26,11 @@ def get_nima_score():
 
     image = request.files['image']
     logging.info(f"Calculating NIMA score for image: {image.filename}")
+    
+    # 스레드풀을 사용해 비동기로 NIMA 점수 계산
     score = executor.submit(calculate_nima_score, image, nima_model).result()
     logging.info(f"Calculated NIMA score: {score} for image: {image.filename}")
+    
     return jsonify({'nima_score': score})
 
 # 그룹 대표 이미지 선택 API
@@ -37,11 +41,13 @@ def representative_images():
     num_representatives = data.get('num_representatives', 3)
 
     logging.info("Selecting representative images for provided groups.")
-    representative_images = select_representative_images(similar_groups, nima_model, num_representatives)
+    
+    # 스레드풀을 사용해 비동기로 대표 이미지 선택
+    representative_images = executor.submit(select_representative_images, similar_groups, nima_model, num_representatives).result()
     logging.info(f"Selected representative images: {representative_images}")
+    
     return jsonify({'representative_images': representative_images})
 
 if __name__ == '__main__':
     logging.info("Starting Flask app...")
     app.run(host='0.0.0.0', port=config.PORT, debug=True)
-    logging.info("Flask서버 연결되었습니다.")
